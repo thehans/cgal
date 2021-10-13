@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL$
-// $Id$
+// $URL: https://github.com/CGAL/cgal/blob/v5.3/Nef_S2/include/CGAL/Nef_S2/sphere_predicates.h $
+// $Id: sphere_predicates.h 31e4638 2020-11-11T18:47:25+00:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -38,11 +38,38 @@ template <class R>
 int spherical_orientation(const Sphere_point<R>& p1,
                           const Sphere_point<R>& p2,
                           const Sphere_point<R>& p3)
-{ return CGAL::orientation(typename R::Point_3(0,0,0),
-                           (typename R::Point_3)p1,
-                           (typename R::Point_3)p2,
-                           (typename R::Point_3)p3); }
-
+{
+  const auto p1x = ((typename R::Point_3)p1).x();
+  const auto p1y = ((typename R::Point_3)p1).y();
+  const auto p1z = ((typename R::Point_3)p1).z();
+  const auto p2x = ((typename R::Point_3)p2).x();
+  const auto p2y = ((typename R::Point_3)p2).y();
+  const auto p2z = ((typename R::Point_3)p2).z();
+  const auto p3x = ((typename R::Point_3)p3).x();
+  const auto p3y = ((typename R::Point_3)p3).y();
+  const auto p3z = ((typename R::Point_3)p3).z();
+  auto t1 = p1y;
+  t1 *= p2z;
+  auto t2 = p1z;
+  t2 *= p2y;
+  t1 -= t2;
+  t1 *= p3x;
+  t2 = p1z;
+  t2 *= p2x;
+  auto t3 = p1x;
+  t3 *= p2z;
+  t2 -= t3;
+  t2 *= p3y;
+  t1 += t2;
+  t3 = p1x;
+  t3 *= p2y;
+  t2 = p1y;
+  t2 *= p2x;
+  t3 -= t2;
+  t3 *= p3z;
+  t1 += t3;
+  return CGAL_NTS sign(t1);
+}
 
 /* |spherical_compare| codes our order of points during the sweep. The
 south pole is the first point, the north pole is the last point, then

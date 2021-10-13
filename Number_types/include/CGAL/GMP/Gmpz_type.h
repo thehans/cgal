@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL$
-// $Id$
+// $URL: https://github.com/CGAL/cgal/blob/v5.3/Number_types/include/CGAL/GMP/Gmpz_type.h $
+// $Id: Gmpz_type.h eb81d59 2020-11-18T07:43:12+00:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -122,12 +122,16 @@ public:
                                  // of the Gmpz
 #endif
 
-#define CGAL_GMPZ_OBJECT_OPERATOR(_op,_class,_fun)    \
-  Gmpz& _op(const _class& z){                        \
-    Gmpz Res;                                         \
-    _fun(Res.mpz(), mpz(), z.mpz());                  \
-    swap(Res);                                        \
-    return *this;                                     \
+#define CGAL_GMPZ_OBJECT_OPERATOR(_op,_class,_fun)  \
+  Gmpz& _op(const _class& z){                       \
+    if (unique()) {                                 \
+      _fun(mpz(), mpz(), z.mpz());                  \
+    } else {                                        \
+      Gmpz Res;                                     \
+      _fun(Res.mpz(), mpz(), z.mpz());              \
+      swap(Res);                                    \
+    }                                               \
+    return *this;                                   \
   }
 
   CGAL_GMPZ_OBJECT_OPERATOR(operator+=,Gmpz,mpz_add);
@@ -146,7 +150,7 @@ public:
   { return mpz_cmp(this->mpz(), b.mpz()) == 0; }
 
 
-  Gmpz operator+() const {return Gmpz( mpz() );}
+  const Gmpz& operator+() const {return *this;}
   Gmpz operator-() const {
     Gmpz Res;
     mpz_neg(Res.mpz(), mpz());
@@ -154,15 +158,23 @@ public:
   }
 
   Gmpz& operator <<= (const unsigned long& i){
-    Gmpz Res;
-    mpz_mul_2exp(Res.mpz(),this->mpz(), i);
-    swap(Res);
+    if (unique()) { 
+      mpz_mul_2exp(this->mpz(),this->mpz(), i);
+    } else {
+      Gmpz Res;
+      mpz_mul_2exp(Res.mpz(),this->mpz(), i);
+      swap(Res);
+    }
     return *this;
   }
   Gmpz& operator >>= (const unsigned long& i){
-    Gmpz Res;
-    mpz_tdiv_q_2exp(Res.mpz(),this->mpz(), i);
-    swap(Res);
+    if (unique()) { 
+      mpz_tdiv_q_2exp(this->mpz(),this->mpz(), i);
+    } else {
+      Gmpz Res;
+      mpz_tdiv_q_2exp(Res.mpz(),this->mpz(), i);
+      swap(Res);
+    }
     return *this;
   }
 
@@ -202,9 +214,13 @@ public:
 
 #define CGAL_GMPZ_SCALAR_OPERATOR(_op,_type,_fun)   \
   inline Gmpz& Gmpz::_op(_type z) {                 \
-    Gmpz Res;                                       \
-    _fun(Res.mpz(), mpz(), z);                      \
-    swap(Res);                                      \
+    if (unique()) {                                 \
+      _fun(mpz(), mpz(), z);                        \
+    } else {                                        \
+      Gmpz Res;                                     \
+      _fun(Res.mpz(), mpz(), z);                    \
+      swap(Res);                                    \
+    }                                               \
     return *this;                                   \
   }
 
@@ -220,23 +236,37 @@ CGAL_GMPZ_SCALAR_OPERATOR(operator/=,unsigned long,mpz_tdiv_q_ui)
 
 inline Gmpz& Gmpz::operator+=(int i)
 {
-  Gmpz Res;
-  if (i >= 0)
-    mpz_add_ui(Res.mpz(), mpz(), i);
-  else
-    mpz_sub_ui(Res.mpz(), mpz(), -i);
-  swap(Res);
+  if (unique()) {
+    if (i >= 0)
+      mpz_add_ui(mpz(), mpz(), i);
+    else
+      mpz_sub_ui(mpz(), mpz(), -i);
+  } else {
+    Gmpz Res;
+    if (i >= 0)
+      mpz_add_ui(Res.mpz(), mpz(), i);
+    else
+      mpz_sub_ui(Res.mpz(), mpz(), -i);
+    swap(Res);
+  }
   return *this;
 }
 
 inline Gmpz& Gmpz::operator+=(long i)
 {
-  Gmpz Res;
-  if (i >= 0)
-    mpz_add_ui(Res.mpz(), mpz(), i);
-  else
-    mpz_sub_ui(Res.mpz(), mpz(), -i);
-  swap(Res);
+  if (unique()) {
+    if (i >= 0)
+      mpz_add_ui(mpz(), mpz(), i);
+    else
+      mpz_sub_ui(mpz(), mpz(), -i);
+  } else {
+    Gmpz Res;
+    if (i >= 0)
+      mpz_add_ui(Res.mpz(), mpz(), i);
+    else
+      mpz_sub_ui(Res.mpz(), mpz(), -i);
+    swap(Res);
+  }
   return *this;
 }
 
@@ -247,9 +277,13 @@ inline Gmpz& Gmpz::operator-=(long i){return *this+=-i;}
 
 inline Gmpz& Gmpz::operator/=(int b) {
   if (b>0) {
-    Gmpz Res;
-    mpz_tdiv_q_ui(Res.mpz(), mpz(), b);
-    swap(Res);
+    if (unique()) {
+      mpz_tdiv_q_ui(mpz(), mpz(), b);
+    } else {
+      Gmpz Res;
+      mpz_tdiv_q_ui(Res.mpz(), mpz(), b);
+      swap(Res);
+    }
     return *this;
   }
   return *this /= Gmpz(b);
@@ -257,9 +291,13 @@ inline Gmpz& Gmpz::operator/=(int b) {
 
 inline Gmpz& Gmpz::operator/=(long b) {
   if (b>0) {
-    Gmpz Res;
-    mpz_tdiv_q_ui(Res.mpz(), mpz(), b);
-    swap(Res);
+    if (unique()) {
+      mpz_tdiv_q_ui(mpz(), mpz(), b);
+    } else {
+      Gmpz Res;
+      mpz_tdiv_q_ui(Res.mpz(), mpz(), b);
+      swap(Res);
+    }
     return *this;
   }
   return *this /= Gmpz(b);
@@ -417,10 +455,10 @@ struct Split_double<Gmpz>
   }
 };
 
-inline Gmpz min BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpz& x,const Gmpz& y){
+inline const Gmpz& min BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpz& x,const Gmpz& y){
   return (x<=y)?x:y;
 }
-inline Gmpz max BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpz& x,const Gmpz& y){
+inline const Gmpz& max BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpz& x,const Gmpz& y){
   return (x>=y)?x:y;
 }
 

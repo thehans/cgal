@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL$
-// $Id$
+// $URL: https://github.com/CGAL/cgal/blob/v5.3/Number_types/include/CGAL/GMP/Gmpq_type.h $
+// $Id: Gmpq_type.h ad758d0 2020-05-20T11:59:03+02:00 Marc Glisse
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -214,7 +214,7 @@ public:
   Gmpz denominator() const
   { return Gmpz(mpq_denref(mpq())); }
 
-  Gmpq operator+() const;
+  const Gmpq& operator+() const;
   Gmpq operator-() const;
 
   Gmpq& operator+=(const Gmpq &q);
@@ -241,31 +241,33 @@ public:
 #endif
 
   // Interoperability with int
-  Gmpq& operator+=(int z){return (*this)+= Gmpq(z);}
-  Gmpq& operator-=(int z){return (*this)-= Gmpq(z);}
-  Gmpq& operator*=(int z){return (*this)*= Gmpq(z);}
-  Gmpq& operator/=(int z){return (*this)/= Gmpq(z);}
+  Gmpq& operator+=(int z){return (*this)+= Gmpz(z);}
+  Gmpq& operator-=(int z){return (*this)-= Gmpz(z);}
+  Gmpq& operator*=(int z){return (*this)*= Gmpz(z);}
+  Gmpq& operator/=(int z){return (*this)/= Gmpz(z);}
   bool  operator==(int z) const {return mpq_cmp_si(mpq(),z,1)==0;}
   bool  operator< (int z) const {return mpq_cmp_si(mpq(),z,1)<0;}
   bool  operator> (int z) const {return mpq_cmp_si(mpq(),z,1)>0;}
 
   // Interoperability with long
-  Gmpq& operator+=(long z){return (*this)+= Gmpq(z);}
-  Gmpq& operator-=(long z){return (*this)-= Gmpq(z);}
-  Gmpq& operator*=(long z){return (*this)*= Gmpq(z);}
-  Gmpq& operator/=(long z){return (*this)/= Gmpq(z);}
+  Gmpq& operator+=(long z){return (*this)+= Gmpz(z);}
+  Gmpq& operator-=(long z){return (*this)-= Gmpz(z);}
+  Gmpq& operator*=(long z){return (*this)*= Gmpz(z);}
+  Gmpq& operator/=(long z){return (*this)/= Gmpz(z);}
   bool  operator==(long z) const {return mpq_cmp_si(mpq(),z,1)==0;}
   bool  operator< (long z) const {return mpq_cmp_si(mpq(),z,1)<0;}
   bool  operator> (long z) const {return mpq_cmp_si(mpq(),z,1)>0;}
 
+#if 0 // ambiguous conversion for functional-style cast from 'long long' to 'CGAL::Gmpz'
   // Interoperability with long long
-  Gmpq& operator+=(long long z){return (*this)+= Gmpq(z);}
-  Gmpq& operator-=(long long z){return (*this)-= Gmpq(z);}
-  Gmpq& operator*=(long long z){return (*this)*= Gmpq(z);}
-  Gmpq& operator/=(long long z){return (*this)/= Gmpq(z);}
-  bool  operator==(long long z) const {return (*this)== Gmpq(z);}
-  bool  operator< (long long z) const {return (*this)<  Gmpq(z);}
-  bool  operator> (long long z) const {return (*this)>  Gmpq(z);}
+  Gmpq& operator+=(long long z){return (*this)+= Gmpz(z);}
+  Gmpq& operator-=(long long z){return (*this)-= Gmpz(z);}
+  Gmpq& operator*=(long long z){return (*this)*= Gmpz(z);}
+  Gmpq& operator/=(long long z){return (*this)/= Gmpz(z);}
+  bool  operator==(long long z) const {return (*this)== Gmpz(z);}
+  bool  operator< (long long z) const {return (*this)<  Gmpz(z);}
+  bool  operator> (long long z) const {return (*this)>  Gmpz(z);}
+#endif
 
   // Interoperability with double
   Gmpq& operator+=(double d){return (*this)+= Gmpq(d);}
@@ -281,18 +283,18 @@ public:
   Gmpq& operator-=(const Gmpz&);
   Gmpq& operator*=(const Gmpz&);
   Gmpq& operator/=(const Gmpz&);
-  bool  operator==(const Gmpz &z) const {return (*this)== Gmpq(z);}
-  bool  operator< (const Gmpz &z) const {return (*this)<  Gmpq(z);}
-  bool  operator> (const Gmpz &z) const {return (*this)>  Gmpq(z);}
+  bool  operator==(const Gmpz &z) const {return mpq_cmp_z(mpq(), z.mpz())==0;}
+  bool  operator< (const Gmpz &z) const {return mpq_cmp_z(mpq(), z.mpz())< 0;}
+  bool  operator> (const Gmpz &z) const {return mpq_cmp_z(mpq(), z.mpz())> 0;}
 
   // Interoperability with Gmpfr
   Gmpq& operator+=(const Gmpfr &f){return (*this)+= Gmpq(f);}
   Gmpq& operator-=(const Gmpfr &f){return (*this)-= Gmpq(f);}
   Gmpq& operator*=(const Gmpfr &f){return (*this)*= Gmpq(f);}
   Gmpq& operator/=(const Gmpfr &f){return (*this)/= Gmpq(f);}
-  bool  operator==(const Gmpfr &f) const {return mpfr_cmp_q(f.fr(),mpq())==0;}
-  bool  operator< (const Gmpfr &f) const {return mpfr_cmp_q(f.fr(),mpq())>0;}
-  bool  operator> (const Gmpfr &f) const {return mpfr_cmp_q(f.fr(),mpq())<0;}
+  bool  operator==(const Gmpfr &f) const {return mpfr_cmp_q(f.fr(), mpq())==0;}
+  bool  operator< (const Gmpfr &f) const {return mpfr_cmp_q(f.fr(), mpq())> 0;}
+  bool  operator> (const Gmpfr &f) const {return mpfr_cmp_q(f.fr(), mpq())< 0;}
 };
 
 
@@ -306,10 +308,10 @@ Gmpq::operator-() const
 }
 
 inline
-Gmpq
+const Gmpq&
 Gmpq::operator+() const
 {
-  return Gmpq(mpq());
+  return *this;
 }
 
 inline
@@ -325,7 +327,13 @@ inline
 Gmpq&
 Gmpq::operator+=(const Gmpq &z)
 {
-    (*this + z).swap(*this);
+    if (unique()) {
+      mpq_add(mpq(), mpq(), z.mpq());
+    }else{
+      Gmpq Res;
+      mpq_add(Res.mpq(), mpq(), z.mpq());
+      swap(Res);
+    }
     return *this;
 }
 
@@ -342,7 +350,13 @@ inline
 Gmpq&
 Gmpq::operator-=(const Gmpq &z)
 {
-    (*this - z).swap(*this);
+    if (unique()) {
+      mpq_sub(mpq(), mpq(), z.mpq());
+    } else {
+      Gmpq Res;
+      mpq_sub(Res.mpq(), mpq(), z.mpq());
+      swap(Res);
+    }
     return *this;
 }
 
@@ -359,7 +373,13 @@ inline
 Gmpq&
 Gmpq::operator*=(const Gmpq &z)
 {
-    (*this * z).swap(*this);
+    if (unique()) {
+      mpq_mul(mpq(), mpq(), z.mpq());
+    } else {
+      Gmpq Res;
+      mpq_mul(Res.mpq(), mpq(), z.mpq());
+      swap(Res);
+    }
     return *this;
 }
 
@@ -377,15 +397,21 @@ inline
 Gmpq&
 Gmpq::operator/=(const Gmpq &z)
 {
-    (*this / z).swap(*this);
+    if (unique()) {
+      mpq_div(mpq(), mpq(), z.mpq());
+    } else {
+      Gmpq Res;
+      mpq_div(Res.mpq(), mpq(), z.mpq());
+      swap(Res);
+    }
     return *this;
 }
 
 inline
 Gmpq& Gmpq::operator+=(const Gmpz &z){
-  if(unique()){
+  if (unique()) {
     mpz_addmul(mpq_numref(mpq()),mpq_denref(mpq()),z.mpz());
-  }else{
+  } else {
     Gmpq result;
     mpz_mul(mpq_numref(result.mpq()),
             mpq_denref(mpq()),
@@ -401,9 +427,9 @@ Gmpq& Gmpq::operator+=(const Gmpz &z){
 
 inline
 Gmpq& Gmpq::operator-=(const Gmpz &z){
-  if(unique()){
+  if (unique()) {
     mpz_submul(mpq_numref(mpq()),mpq_denref(mpq()),z.mpz());
-  }else{
+  } else {
     Gmpq result;
     mpz_mul(mpq_numref(result.mpq()),
             mpq_denref(mpq()),
@@ -419,10 +445,10 @@ Gmpq& Gmpq::operator-=(const Gmpz &z){
 
 inline
 Gmpq& Gmpq::operator*=(const Gmpz &z){
-  if(unique()){
+  if (unique()) {
     mpz_mul(mpq_numref(mpq()),mpq_numref(mpq()),z.mpz());
     mpq_canonicalize(mpq());
-  }else{
+  } else {
     Gmpq result;
     mpz_mul(mpq_numref(result.mpq()),mpq_numref(mpq()),z.mpz());
     mpz_set(mpq_denref(result.mpq()),mpq_denref(mpq()));
@@ -434,10 +460,10 @@ Gmpq& Gmpq::operator*=(const Gmpz &z){
 
 inline
 Gmpq& Gmpq::operator/=(const Gmpz &z){
-  if(unique()){
+  if (unique()) {
     mpz_mul(mpq_denref(mpq()),mpq_denref(mpq()),z.mpz());
     mpq_canonicalize(mpq());
-  }else{
+  } else {
     Gmpq result;
     mpz_mul(mpq_denref(result.mpq()),mpq_denref(mpq()),z.mpz());
     mpz_set(mpq_numref(result.mpq()),mpq_numref(mpq()));
@@ -496,10 +522,10 @@ operator>>(std::istream& is, Gmpq &z)
 }
 
 
-inline Gmpq min BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpq& x,const Gmpq& y){
+inline const Gmpq& min BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpq& x,const Gmpq& y){
   return (x<=y)?x:y;
 }
-inline Gmpq max BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpq& x,const Gmpq& y){
+inline const Gmpq& max BOOST_PREVENT_MACRO_SUBSTITUTION(const Gmpq& x,const Gmpq& y){
   return (x>=y)?x:y;
 }
 
